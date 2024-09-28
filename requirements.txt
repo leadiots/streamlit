@@ -1,6 +1,6 @@
 streamlit
-firebase-admin  # 예: Firebase Admin SDK를 사용하는 경우
 plotly
+firebase-admin  # 예: Firebase Admin SDK를 사용하는 경우
 pandas
 datetime
 streamlit_autorefresh
