@@ -1,8 +1,7 @@
 streamlit
 plotly
-firebase-admin  # 예: Firebase Admin SDK를 사용하는 경우
 pandas
-datetime
-streamlit_autorefresh
+firebase-admin
+google-cloud-firestore
 numpy
-random
+streamlit-autorefresh
