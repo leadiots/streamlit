@@ -547,13 +547,27 @@ def region_settings_page():
 
     # 저장된 그룹 보여주기
     st.subheader("저장된 그룹")
+    
+    # 삭제할 그룹을 저장할 리스트
+    groups_to_delete = []
+
     if st.session_state.groups:
         for group_name, eps in st.session_state.groups.items():
-            st.write(f"**{group_name}**: {', '.join(eps)}")
+            col1, col2 = st.columns([3, 1])  # 두 개의 열 생성
+            with col1:
+                st.write(f"**{group_name}**: {', '.join(eps)}")
+            with col2:
+                # 그룹 삭제 버튼
+                if st.button("삭제", key=group_name):  # 고유 키를 사용하여 각 버튼 구분
+                    groups_to_delete.append(group_name)  # 삭제할 그룹을 리스트에 추가
+
+        # 삭제할 그룹이 있으면 세션 상태에서 삭제
+        for group in groups_to_delete:
+            del st.session_state.groups[group]  # 세션 상태에서 그룹 삭제
+            save_groups_to_firestore(st.session_state.groups)  # Firestore에 업데이트
+            st.success(f"그룹 '{group}'이(가) 삭제되었습니다.")
     else:
         st.write("아직 저장된 그룹이 없습니다.")
-
-
 
 # 그룹의 EP 데이터를 합산하는 함수
 def calculate_group_data(group_eps, ep_data):
