@@ -44,7 +44,7 @@ def set_page(page_name):
 @st.cache_resource
 def initialize_firebase():
     if not firebase_admin._apps:
-        cred = credentials.Certificate("waterflow-t1-firebase-adminsdk-yqrl2-54db190858.json")
+        cred = credentials.Certificate("waterflow-t1-firebase-adminsdk-yqrl2-584875fcad.json")
         firebase_admin.initialize_app(cred)
     return firestore.client()
 
