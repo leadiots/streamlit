@@ -44,7 +44,7 @@ def set_page(page_name):
 @st.cache_resource
 def initialize_firebase():
     if not firebase_admin._apps:
-        cred = credentials.Certificate("waterflow-t1-firebase-adminsdk-yqrl2-584875fcad.json")
+        cred = credentials.Certificate("waterflow-t1-firebase-adminsdk-yqrl2-1cd48dc7ac.json")
         firebase_admin.initialize_app(cred)
     return firestore.client()
 
@@ -509,18 +509,13 @@ def fee_simulation_page():
         st.write(f"물이용부담금: {water_use_fee:.2f} 원")
         st.subheader(f"총 요금: {total_fee:.2f} 원")
 
-# Firestore에서 그룹 정보를 가져오는 함수
-def load_groups_from_firestore():
-    doc_ref = db.collection('Waterflow_data').document('groups')  # 적절한 문서 경로 설정
-    doc = doc_ref.get()
-    if doc.exists:
-        return doc.to_dict()
-    return {}
-
-# Firestore에 그룹 정보를 저장하는 함수
-def save_groups_to_firestore(groups):
-    doc_ref = db.collection('Waterflow_data').document('groups')
-    doc_ref.set(groups)
+# 그룹을 삭제하는 함수
+def delete_group(group_name):
+    # 세션 상태에서 그룹 삭제
+    if group_name in st.session_state.groups:
+        del st.session_state.groups[group_name]
+        # Firestore에서도 그룹 삭제
+        save_groups_to_firestore(st.session_state.groups)
 
 # 그룹을 생성하고 저장하는 함수 (구역 설정)
 def region_settings_page():
@@ -547,27 +542,32 @@ def region_settings_page():
 
     # 저장된 그룹 보여주기
     st.subheader("저장된 그룹")
-    
-    # 삭제할 그룹을 저장할 리스트
-    groups_to_delete = []
-
-    if st.session_state.groups:
-        for group_name, eps in st.session_state.groups.items():
+    groups_copy = st.session_state.groups.copy()  # 딕셔너리 복사본 사용
+    if groups_copy:
+        for group_name, eps in groups_copy.items():
             col1, col2 = st.columns([3, 1])  # 두 개의 열 생성
             with col1:
                 st.write(f"**{group_name}**: {', '.join(eps)}")
             with col2:
                 # 그룹 삭제 버튼
-                if st.button("삭제", key=group_name):  # 고유 키를 사용하여 각 버튼 구분
-                    groups_to_delete.append(group_name)  # 삭제할 그룹을 리스트에 추가
-
-        # 삭제할 그룹이 있으면 세션 상태에서 삭제
-        for group in groups_to_delete:
-            del st.session_state.groups[group]  # 세션 상태에서 그룹 삭제
-            save_groups_to_firestore(st.session_state.groups)  # Firestore에 업데이트
-            st.success(f"그룹 '{group}'이(가) 삭제되었습니다.")
+                if st.button(f"삭제", key=group_name):  # 고유 키를 사용하여 각 버튼 구분
+                    delete_group(group_name)
+                    st.success(f"그룹 '{group_name}'이(가) 삭제되었습니다.")
     else:
         st.write("아직 저장된 그룹이 없습니다.")
+
+# Firestore에서 그룹 정보를 가져오는 함수
+def load_groups_from_firestore():
+    doc_ref = db.collection('Waterflow_data').document('groups')  # 적절한 문서 경로 설정
+    doc = doc_ref.get()
+    if doc.exists:
+        return doc.to_dict()
+    return {}
+
+# Firestore에 그룹 정보를 저장하는 함수
+def save_groups_to_firestore(groups):
+    doc_ref = db.collection('Waterflow_data').document('groups')
+    doc_ref.set(groups)
 
 # 그룹의 EP 데이터를 합산하는 함수
 def calculate_group_data(group_eps, ep_data):
