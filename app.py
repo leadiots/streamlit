@@ -251,7 +251,7 @@ def display_total_flow():
             fig = go.Figure(go.Indicator(
                 mode="gauge+number",
                 value=total_flow,
-                gauge={'axis': {'range': [None, max(500, total_flow)]}},
+                gauge={'axis': {'range': [None, max(0, 1500)]}},
                 domain={'x': [0, 1], 'y': [0, 1]},
                 title={'text': "TOTAL GROUP REALTIME USAGE(L/MIN)"}
             ))
